@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>A Letter For You 💌</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Helvetica, serif;
+      background: linear-gradient(135deg, #ffd6e8, #ffeef6);
+      overflow: hidden;
+    }
+
+    .click_text {
+      position: absolute;
+      top: -30px;
+      width: 100%;
+      font-weight: bold;
+      text-align: center;
+      font-size: 18px;
+      color: #ff5fa5;
+      opacity: 0.85;
+      pointer-events: none;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .click_text.hide {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    @keyframes float {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-6px); }
+      100% { transform: translateY(0); }
+    }
+
+    .scene {
+      position: relative;
+      width: 360px;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ================= ENVELOPE ================= */
+    .envelope {
+      position: absolute;
+      width: 220px;
+      height: 140px;
+      background: #ff9ecb;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+      z-index: 2;
+    }
+
+    .envelope::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 110px solid transparent;
+      border-right: 110px solid transparent;
+      border-top: 70px solid #ff7fb8;
+    }
+
+    .envelope.open {
+      transform: scale(0.8) translateY(40px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ================= PAPER ================= */
+    .paper {
+      position: absolute;
+      width: 340px;
+      min-height: 240px;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.7s ease;
+      z-index: 1;
+    }
+
+    .paper.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      z-index: 3;
+    }
+
+    .buttons {
+      margin-top: 16px;
+    }
+
+    button {
+      padding: 8px 18px;
+      margin: 6px;
+      border: none;
+      border-radius: 20px;
+      background: #ff7fb8;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #ff5fa5;
+    }
+
+    .image {
+      width: 90px;
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scene">
+    <div class="click_text" id="clickText">
+      Click on the envelope!
+    </div>
+
+    <div class="envelope" id="envelope"></div>
+
+    <div class="paper" id="paper">
+      <div id="content"></div>
+      <div class="buttons" id="buttons"></div>
+    </div>
+  </div>
+
+<script>
+  const clickText = document.getElementById("clickText");
+  const envelope = document.getElementById("envelope");
+  const paper = document.getElementById("paper");
+  const content = document.getElementById("content");
+  const buttons = document.getElementById("buttons");
+
+  let page = 0;
+
+  const pages = [
+    `
+      <p>To the dearest,</p>
+      <p><b>Ruth Cordor Rymbai Hynniewta</b></p>
+      <p>aka</p>
+      <p>crittersniffer, ruth, ruti, rutigga</p>
+    `,
+    `
+      <img src="https://media.tenor.com/YJcO2I7pvgIAAAAe/cute-doodle.png" class="image">
+      <p>I am sorry I've wronged you these past few days...</p>
+    `,
+    `
+      <img src="https://stickerly.pstatic.net/sticker_pack/13279e882d3a25af/C8WFTG/2/2f3dce9d-4dcd-4904-9e4c-65608f7aad78-013.png" class="image">
+      <p>I have an important question to ask you...</p>
+    `,
+    `
+      <img src="https://media.tenor.com/yGlNhzA58RUAAAAe/nub-nub-cat.png" class="image">
+      <p>Will you be the <span id="pair1">Rogue</span> to my <span id="pair2">Gambit</span>?</p>
+    `,
+    `
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXDtJ3VBI0wYVP9wbNgZ2LV_VpMyBKmot_xw&s" class="image">
+      <p><b>A date, just you and me, on the 14th! 💚💜</b></p>
+    `
+  ];
+
+  const pairs = [
+    ["Rogue", "Gambit"],
+    ["Sue", "Reed"],
+    ["Storm", "Black Panther"],
+    ["Mantis", "Loki"],
+    ["Emma", "Tony"]
+  ];
+
+  envelope.onclick = () => {
+    clickText.classList.add("hide");
+    envelope.classList.add("open");
+    setTimeout(() => {
+      paper.classList.add("show");
+      renderPage();
+    }, 500);
+  };
+
+  function renderPage() {
+    content.innerHTML = pages[page];
+    buttons.innerHTML = "";
+
+    if (page < 3) {
+      const next = document.createElement("button");
+      next.innerText = "Next";
+      next.onclick = () => {
+        page++;
+        renderPage();
+      };
+      buttons.appendChild(next);
+    }
+
+    if (page === 3) {
+      const yes = document.createElement("button");
+      yes.innerText = "Yes 💖";
+      yes.onclick = () => {
+        page++;
+        renderPage();
+      };
+
+      const no = document.createElement("button");
+      no.innerText = "No";
+      no.onclick = () => {
+        alert("NUH UH, YOU DON'T GET TO CLICK NO! 😠");
+      };
+
+      buttons.appendChild(yes);
+      buttons.appendChild(no);
+
+      startSwap();
+    }
+  }
+
+  function startSwap() {
+    let i = 0;
+    setInterval(() => {
+      const a = document.getElementById("pair1");
+      const b = document.getElementById("pair2");
+      if (!a || !b) return;
+      a.innerText = pairs[i][0];
+      b.innerText = pairs[i][1];
+      i = (i + 1) % pairs.length;
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
